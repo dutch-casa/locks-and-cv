@@ -112,7 +112,13 @@ lock_create(const char *name)
 		return NULL;
 	}
 	
-	// add stuff here as needed
+	//initialize lock state
+	lock->lk_held = false;
+	lock->lk_holder = NULL;
+
+
+	
+	
 	
 	return lock;
 }
@@ -131,15 +137,47 @@ lock_destroy(struct lock *lock)
 void
 lock_acquire(struct lock *lock)
 {
-	// Write this
+	//disable interrupts
+	int spl;
+	assert(lock != NULL);
+	spl = splhigh();
 
+	while(lock->lk_held == true && lk_holder != curthread) {
+		//We can't use the lock if another thread has it, so we'll sleep
+		thread_sleep(lock);
+	}
+
+	//once the current thread is holding the lock we can continue
+	
+	lock->lk_held = true;
+	lock->lk_holder = curthread;
+
+	//reenable interrupts
+	splx(spl);
+	
 	(void)lock;  // suppress warning until code gets written
 }
 
 void
 lock_release(struct lock *lock)
 {
-	// Write this
+	//init spl and make sure lock isn't null
+	int spl;
+	assert(lock != NULL);
+
+	//disable interrupts
+	spl = splhigh();
+
+	// let go of the lock
+	lock -> lk_held = false;
+	lock -> lk_holder = NULL;
+
+	//wakeup any threads that were waiting on this lock
+	thread_wakeup(lock);
+
+	//reenable interrupts
+	splx(spl);
+
 
 	(void)lock;  // suppress warning until code gets written
 }
@@ -147,11 +185,8 @@ lock_release(struct lock *lock)
 int
 lock_do_i_hold(struct lock *lock)
 {
-	// Write this
-
-	(void)lock;  // suppress warning until code gets written
-
-	return 1;    // dummy until code gets written
+	//returns true or false depending if thread is holding a lock.
+	return(lock->lk_holder == curthread);
 }
 
 ////////////////////////////////////////////////////////////
@@ -175,7 +210,8 @@ cv_create(const char *name)
 		return NULL;
 	}
 	
-	// add stuff here as needed
+	cv->count = 0;
+	cv->tqueue = ;
 	
 	return cv;
 }

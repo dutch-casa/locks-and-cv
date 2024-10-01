@@ -50,7 +50,9 @@ void              sem_destroy(struct semaphore *);
 
 struct lock {
 	char *name;
-	// add what you need here
+	//holding
+	volatile bool *lk_held; // are we being held?
+	volatile struct thread *lk_holder; // who is holding us?	
 	// (don't forget to mark things volatile as needed)
 };
 
@@ -89,8 +91,6 @@ void         lock_destroy(struct lock *);
 
 struct cv {
 	char *name;
-	// add what you need here
-	// (don't forget to mark things volatile as needed)
 };
 
 struct cv *cv_create(const char *name);
