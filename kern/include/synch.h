@@ -51,7 +51,6 @@ void              sem_destroy(struct semaphore *);
 struct lock {
 	char *name;
 	//holding
-	volatile bool *lk_held; // are we being held?
 	volatile struct thread *lk_holder; // who is holding us?	
 	// (don't forget to mark things volatile as needed)
 };
